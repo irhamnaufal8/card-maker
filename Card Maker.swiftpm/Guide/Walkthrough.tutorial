@@ -1,0 +1,277 @@
+@GuideBook(title: "Card Maker", icon: title.png, background: titleBackground.png, firstFile: CardMakerApp.swift) {
+    @WelcomeMessage(title: "Card Maker") {
+        This guide helps you create personalized greeting cards by altering text and fonts, adding, moving, rotating, and zooming images with gestures, and exporting them as PDFs or images.
+    }
+    @Guide {
+        @Step(title: "Card Maker") {
+            @ContentAndMedia {
+                ![](intro.png)
+                
+                Welcome to the Card Maker app. In this guide, you'll learn how to use [SwiftUI](doc://com.apple.documentation/documentation/swiftui) to create custom greeting cards that you can personalize to your heart's content.
+                
+                Card Maker app is an extension of [Recognizing Gestures](x-com-apple-playgrounds://projects?contentId=com.apple.playgrounds.recognizinggestures) app.
+                
+                You'll discover how to modify [Text](doc://com.apple.documentation/documentation/swiftui/text) and [Font](doc://com.apple.documentation/documentation/swiftui/font), add stickers, and use some [Gestures](doc://com.apple.documentation/documentation/swiftui/gesture) to move, rotate, and scale those stickers to make the perfect card. Additionally, you'll explore how to export your creations as either PDFs or images with [ImageRenderer](doc://com.apple.documentation/documentation/swiftui/imagerenderer).
+                
+                @GuideButton(type: walkthrough, title: "Start Walkthrough", description: "AX description for button")
+            }
+            @TaskGroup(title: "Modelling the data") {
+                Explore how to model a structure with various SwiftUI data type
+                
+                @Task(type: walkthrough, title: "Model the Text", id: "TextModel", file: TextModel.swift) {
+                    @Page(id: "2.typography", title: "") {
+                        This `TextModel` has a `typography` property that stores a cool Apple's [Font.Design](doc://com.apple.documentation/documentation/swiftui/font/design). We can modify the text font design later with this property.
+                    }
+                    @Page(id: "2.alignment", title: "") {
+                        Next, this `TextModel` has an `alignment` property that can modify the SwiftUI's [TextAlignment](doc://com.apple.documentation/documentation/swiftui/textalignment).
+                    }
+                    @Page(id: "2.colorProperty", title: "") {
+                        It also has a `color` property to customize the text color. It is from `ThemeColor` enum
+                    }
+                    @Page(id: "2.colorEnum", title: "") {
+                        This `ThemeColor` enum contain multiple cases of custom color, allowing us to easily apply consistent color themes throughout the text. Want to try add a new color?
+                        
+                        You can try these steps.
+                        1. Add another case of color.
+                        2. Specify the [Color](doc://com.apple.documentation/documentation/swiftui/color) to be returned in `color` and `bgColor` properties.
+                    }
+                    @Page(id: "2.textStyle", title: "") {
+                        Back to `TextModel`, it has `isBold`, `isItalic`, `underline`, and `underlineColor` properties to styling the text (Bold, Italic, and Underline).
+                    }
+                    @Page(id: "2.static", title: "") {
+                        Last, it also has two static properties to make sample data of `TextModel` and an [Array](doc://com.apple.documentation/documentation/swift/array) of `TextModel`
+                    }
+                }
+                @Task(type: walkthrough, title: "Model the Sticker", id: "StickerModel", file: StickerModel.swift) {
+                    @Page(id: "3.image", title: "") {
+                        This `StickerModel` has an `image` property that stores the SwiftUI's [Image](doc://com.apple.documentation/documentation/swiftui/image).
+                    }
+                    @Page(id: "3.isActive", title: "") {
+                        `StickerModel` has an `isActive` property to let us know which sticker we are editing.
+                    }
+                    @Page(id: "3.stickerProperties", title: "") {
+                        It also stores the `position`, `scale`, and `rotation` of the sticker.
+                    }
+                    @Page(id: "3.staticList", title: "") {
+                        Last, it has `stickerList` static property to make a list of sticker.
+                    }
+                }
+            }
+            @TaskGroup(title: "Exploring view components") {
+                @Task(type: walkthrough, title: "Multiline Text Field", id: "MultilineTextField", file: MultilineTextField.swift) {
+                    @Page(id: "1.textFieldType", title: "") {
+                        First, let's create a `TextFieldType` enum to define two types of [TextField](doc://com.apple.documentation/documentation/swiftui/textfield).
+                        
+                        the `title` is used for the title of the card,
+                        
+                        while the `message` is used for the message of the card.
+                    }
+                    @Page(id: "1.properties", title: "") {
+                        This `MultilineTextField` view component has several key properties.
+                        
+                        1. `text` is used to store the data from `TextModel`. It's wrapped with [@Binding](doc://com.apple.documentation/documentation/swiftui/binding) property wrapper, so the data will exactly the same between all [View](doc://com.apple.documentation/documentation/swiftui/view).
+                        2. `isRendering` is used to let us know wheter the card is in rendering process or not.
+                        3. `type` is used to define wheter this text field is for card title or card message.
+                        4. `delete` is a function that we will use to delete this text field.
+                    }
+                    @Page(id: "1.isFocused", title: "") {
+                        `isFocused` is used to let us know wheter the cursor is focus on this text field or not. This automatically possible because it's wrapped in [@FocusState](doc://com.apple.documentation/documentation/swiftui/focusstate) property wrapper.
+                    }
+                    @Page(id: "1.group", title: "") {
+                        Let's make the main view of this component!
+                        
+                        When the card is in rendering process, let's simply show as a `Text`. Otherwise, let's show it as a `TextField`. It's used to prevent the unwanted condition when rendering `TextField` as an Image or PDF.
+                        
+                        Don't forget to add `axis` parameter in the `TextField` and give the `.vertical` value.
+                    }
+                    @Page(id: "1.textStyleModifiers", title: "", isAddable: true) {
+                        Let's add these following modifiers and try to modify the text style in the preview.
+                        
+                        ```
+                        .multilineTextAlignment(text.alignment)
+                        .font(.system(style, design: text.typography))
+                        .bold(text.isBold)
+                        .italic(text.isItalic)
+                        .underline(
+                            text.underline != .none,
+                            pattern: text.underline.style ?? .solid,
+                            color: text.underlineColor == .initial ? text.color.color : text.underlineColor.color
+                        )
+                        .focused($isFocused)
+                        ```
+                        
+                        1. [font](doc://com.apple.documentation/documentation/swiftui/font) modifier is used to modify the font of the text.
+                        2. [multilineTextAlignment](doc://com.apple.documentation/documentation/swiftui/environmentvalues/multilinetextalignment) modifier is used to modify the alignment of the text.
+                        3. [bold](doc://com.apple.documentation/documentation/swiftui/view/bold(_:)) modifier is used to make the text to be bold when it's active.
+                        4. [italic](doc://com.apple.documentation/documentation/swiftui/view/italic(_:)) modifier is used to make the text to be italic when it's active.
+                        5. [underline](doc://com.apple.documentation/documentation/swiftui/view/italic(_:)) modifier is used to make the text to be underlined when it's active. It can also modify the pattern of the underline and its color.
+                        6. [focused](doc://com.apple.documentation/documentation/swiftui/foregroundstyle) modifier is used to assign the focus status of the `TextField` to the property that wrapped in [@FocusState](doc://com.apple.documentation/documentation/swiftui/focusstate).
+                    }
+                }
+                @Task(type: walkthrough, title: "Sticker View", id: "StickerView", file: StickerView.swift) {
+                    @Page(id: "2.properties", title: "") {
+                        Let's move to another component: `StickerView`. This component has these following properties:
+                        
+                        1. `sticker` is used to store the `StickerModel` data. It's wrapped with [@Binding](doc://com.apple.documentation/documentation/swiftui/binding) property wrapper, so the data will exactly the same between all [View](doc://com.apple.documentation/documentation/swiftui/view).
+                        2. We will use `activate` property to change which sticker is selected.
+                        3. We will use `delete` property to delete selected sticker.
+                    }
+                    @Page(id: "2.stickerBaseModifier", title: "", isAddable: true) {
+                        Display the `sticker.image` in the main view body using [.resizable](doc://com.apple.documentation/documentation/swiftui/image/resizable(capinsets:resizingmode:)) and [.scaledToFit](doc://com.apple.documentation/documentation/swiftui/view/scaledtofit()) modifiers for sizing.
+                        ```
+                        .resizable()
+                        .scaledToFit()
+                        ```
+                    }
+                }
+            }
+            @TaskGroup(title: "Add main logic and gesure logic") {
+                @Task(type: walkthrough, title: "Canvas Manager", id: "CanvasManager", file: CanvasManager.swift) {
+                    Add text, sticker, photo, and other main logic.
+                    @Page(id: "1.mainProperty", title: "") {
+                        This `CanvasManager` stores several value in these properties. They are wrapped in [@Published](doc://com.apple.documentation/documentation/combine/published) property wrapper that notifies observers about changes to the property’s value, enabling SwiftUI views to update automatically in response to state changes.
+                        
+                        1. `title` and `messages` is used to store the title and the messages of the card.
+                        2.  `draggedMessage` is used to store current dragged message.
+                        3. `stickers` is used to store all the stickers in the card.
+                        4. `photo` is used to store picked photo from Photo Library.
+                        5. `pdfURL` is used to store the URL after the card is successfully rendered into PDF.
+                    }
+                    @Page(id: "1.additionalProperty", title: "") {
+                        `CanvasManager` also stores these properties:
+                        
+                        1. `isRendering` indicates if the card is being rendered.
+                        2. `isShowToolbar` controls the toolbar's visibility.
+                        3. `isShowStickerList` shows or hides the sticker selection list.
+                        4. `isShowAlert` toggles alert visibility.
+                        5. `alertTitle` and `alertMessage` hold the text for alerts.
+                    }
+                    @Page(id: "1.keyboardPublisher", title: "") {
+                        `keyboardPublisher` is used to create a publisher that emits a `true` value whenever the iOS keyboard is about to show, utilizing the [Combine](doc://com.apple.documentation/documentation/combine) framework. It listens for [UIResponder.keyboardWillShowNotification](doc://com.apple.documentation/documentation/uikit/uiresponder/1621576-keyboardwillshownotification) notifications and transforms them into boolean signals.
+                    }
+                    @Page(id: "1.textFunction", title: "") {
+                        Let's take a look to these two logics.
+                        
+                        1. `addAnotherText()` is a function to add a message text into the card.
+                        2. `deleteText(_ text: TextModel)` is a function to delete a specific message text from the card.
+                    }
+                    @Page(id: "1.stickerFunction", title: "") {
+                        Now, let's move on to some logics for the sticker. These are functions to add new sticker, delete sticker, activate sticker, and unactive all stickers.
+                        
+                        We need to activate a specific sticker so we can see the delete button on the sticker. Also, we need to unactive all of the stickers from the card, so the view is ready to be rendered to an image.
+                    }
+                }
+                @Task(type: walkthrough, title: "Gesture Logic", id: "GestureLogic", file: StickerView.swift) {
+                    Move, rotate, and scale the sticker with gestures.
+                    @Page(id: "2.onTapGesture", title: "On Tap Gesture", isAddable: true) {
+                        Now, let's add a tap gesture logic to the sticker. Whenever it tapped, the sticker will be activated so the border and delete button will shown. You can do that by adding [.onTapGesture](doc://com.apple.documentation/documentation/swiftui/view/onTapGesture(count:perform:)) modifier like this:
+                        ```
+                        .onTapGesture {
+                            activate(sticker.id)
+                        }
+                        ```
+                        
+                        Try to tap the sticker on the preview and then tap the white background.
+                    }
+                    @Page(id: "2.dragGesture", title: "Drag Gesture", isAddable: true) {
+                        Let's add another gesture. We want to move this sticker whenever it's dragged. In SwiftUI, we can enable sticker movement upon dragging by simply adding a [DragGesture](doc://com.apple.documentation/documentation/swiftui/draggesture) to the sticker like this:
+                        ```
+                        .gesture(
+                            DragGesture()
+                                .onChanged { value in
+                                    withAnimation(.easeIn(duration: 0.3)) {
+                                        sticker.position = value.location
+                                    }
+                                }
+                                // MARK: rotation gesture modifier
+                        )
+                        ```
+                        
+                        1. When we drag the sticker, the `.onChanged` closure gets called with the `value` parameter, containing the touch point's new screen coordinates.
+                        2. The `sticker.position` is then updated to the new `value.location` within an animation block set to ease in over 0.3 seconds, making the sticker smoothly follow the finger's current touch position.
+                        
+                        Essentially, it allows the sticker to be interactively moved across the screen.
+                    }
+                    @Page(id: "2.roationGesture", title: "Rotation Gesture", isAddable: true) {
+                        Cool! Now, let's add another gesture! We want to rotate this sticker. We can do that by adding a [RotationGesture](doc://com.apple.documentation/documentation/swiftui/rotationgesture) or [RotateGesture](doc://com.apple.documentation/documentation/swiftui/rotategesture) with [.simultaneously](doc://com.apple.documentation/documentation/swiftui/gesture/simultaneously(with:)) modifier right after the DragGesture's `.onChanged` modifier. Let's try this code:
+                        ```
+                        .simultaneously(
+                            with: RotationGesture()
+                                .onChanged { value in
+                                    withAnimation(.easeIn(duration: 0.3)) {
+                                        sticker.rotation = value
+                                    }
+                                }
+                        )
+                        // MARK: magnification gesture modifier
+                        ```
+                        
+                        1. [.simultaneously](doc://com.apple.documentation/documentation/swiftui/gesture/simultaneously(with:)) modifier combines the `DragGesture` with a new `RotationGesture`.
+                        2. The `RotationGesture`'s `.onChanged` closure updates the sticker's `rotation` property with the rotation value, allowing us to spin it while dragging.
+                        
+                        Both gestures' changes happen concurrently within the same animation block, creating a seamless combined interaction.
+                    }
+                    @Page(id: "2.maginificationGesture", title: "Magnification Gesture", isAddable: true) {
+                        Last, we want to re-scale the sticker whenever we pinched it. We can do that by adding a [MagnificationGesture](doc://com.apple.documentation/documentation/swiftui/magnificationgesture) or [MagnifyGesture](doc://com.apple.documentation/documentation/swiftui/magnifygesture), again with a [.simultaneously](doc://com.apple.documentation/documentation/swiftui/gesture/simultaneously(with:)) modifier right after the RotationGesture's `.simultaneously` modifier. Let's try this code:
+                        ```
+                        .simultaneously(
+                            with: MagnificationGesture()
+                                .onChanged { value in
+                                    withAnimation(.easeIn(duration: 0.3)) {
+                                        sticker.scale = value
+                                    }
+                                }
+                        )
+                        ```
+                        1. [.simultaneously](doc://com.apple.documentation/documentation/swiftui/gesture/simultaneously(with:)) modifier adds another layer of interaction on top of the existing rotation gesture.
+                        2. `MagnificationGesture` recognizes pinching motions and provides a `value` representing the scaling factor.
+                        3. The `.onChanged` closure updates the sticker's `scale` property with the `value`, making it larger or smaller based on the pinch.
+                    }
+                }
+                @Task(type: walkthrough, title: "Export the card", id: "ExportLogic", file: CanvasManager.swift) {
+                    Export the SwiftUI view as an image or PDF with ImageRenderer.
+                    @Page(id: "3.cardRenderer", title: "") {
+                        First, we need a function called `cardRenderer`. This function returns [ImageRenderer](doc://com.apple.documentation/documentation/swiftui/imagerenderer) that used to render a `CanvasView`.
+                        
+                        1. To render SwiftUI View, we can do that simply by create an instance called `renderer` of `ImageRenderer(content: View)` and fill the `content` parameter with desired view. In this tutorial, we will render the `CanvasView`.
+                        2. Additionally, if we want to give sepcific size of the view area that we want to be rendered, we can simply define the `proposedSize` of the `renderer`. For example, we use 600 px for the `width` and 800 px for the `height`.
+                        3. `scale` is used to rescale the result image. In this code, we use 3 times of scale. It means, the result will have 1.800 px for the width, and 2.400 px for the height.
+                    }
+                    @Page(id: "3.saveAsPhoto", title: "") {
+                        Next, we have a function to save rendered image to the Photo Gallery.
+                        
+                        1. Set `isRendering` to `true` to indicates the start of the rendering process.
+                        2. Extract the [UIImage](doc://com.apple.documentation/documentation/uikit/uiimage) from `cardRenderer()` function and save it as an `image` constant.
+                        3. Save the `image` into the Photo Gallery using [UIImageWriteToSavedPhotosAlbum](doc://com.apple.documentation/documentation/uikit/1619125-uiimagewritetosavedphotosalbum). In this code, we add `savePhotoCompleted` function to handle action after saving the image.
+                    }
+                    @Page(id: "3.savePhotoCompleted", title: "") {
+                        In `savePhotoCompleted` function, we handle the condition after saving the image. If there's an error, we will show the error with the error message. Otherwise, we will show the alert with success message
+                    }
+                    @Page(id: "3.saveAsPDF", title: "") {
+                        If we want to export the card as a PDF, we can do that with these following steps.
+                        
+                        1. [URL.documentsDirectory](doc://com.apple.documentation/documentation/foundation/url/3988456-documentsdirectory) retrieves the user's documents directory location, then we create a new file named "My Card.pdf" within that directory.
+                        2. Use the `cardRenderer` function and the `render` method is used with a closure to handle PDF generation. The closure receives two arguments: the `size` of the rendered image and a drawing `context` for creating the PDF content.
+                        3. Inside the closure, `mediaBox` defines the rectangular area representing the content within the PDF. [CGContext(url as CFURL, mediaBox: &mediaBox, nil)](doc://com.apple.documentation/documentation/coregraphics/cgcontext) attempts to create a PDF context at the specified `URL` with the given `mediaBox`.
+                        4. [pdf.beginPDFPage(nil)](doc://com.apple.documentation/documentation/coregraphics/cgcontext/1456578-beginpdfpage) starts a new page within the PDF.
+                        5. `context(pdf)` executes the provided `context` closure, likely drawing the card image content using the PDF context.
+                        6. [pdf.endPDFPage()](doc://com.apple.documentation/documentation/coregraphics/cgcontext/1456122-endpdfpage) finishes the current page.
+                        7. [pdf.closePDF()](doc://com.apple.documentation/documentation/coregraphics/cgcontext/1454306-closepdf) finalizes the PDF document.
+                        8. Last, set back `isRendering` to `false` to indicate the function has finished and `pdfURL` is set to the created PDF file's URL for later shown in [ShareLink](doc://com.apple.documentation/documentation/swiftui/sharelink).
+                    }
+                    @Page(id: "finished", title: "Well done!") {
+                        You've successfully built a functional card creation app.
+
+                        Now, you can use this app to create personalized greeting cards for your loved ones. Why not start by making a card for yourself to celebrate your achievement? 🤩
+
+                        Keep exploring other projects in Swift Playgrounds to further enhance your SwiftUI skills.
+                        
+                        The possibilities are endless! ✨
+
+                        Keep up the great work!
+                    }
+                }
+            }
+        }
+    }
+}
